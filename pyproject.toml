@@ -1,0 +1,21 @@
+[project]
+name = "mcp-tutor"
+version = "0.1.0"
+description = "Universal Active Learning MCP Server based on Amos Blomqvist's Socratic Tutoring System"
+authors = [{ name = "Tutor Team" }]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=2.2.0",
+    "pydantic>=2.0.0",
+    "aiofiles>=24.0.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.30.0",
+]
+
+[project.scripts]
+mcp-tutor = "mcp_tutor.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
