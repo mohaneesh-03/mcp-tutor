@@ -27,26 +27,26 @@ Standard LLM learning interactions suffer from **passive reading, sycophancy, ra
 
 ```mermaid
 flowchart TD
-    subgraph Client [Any MCP-Compliant AI Harness]
-        Agent[AI Agent / LLM]
-        Skill["Universal 'teach' Skill<br/>(skills/teach/SKILL.md)"]
+    subgraph Client ["Any MCP-Compliant AI Harness"]
+        Agent["AI Agent / LLM"]
+        Skill["Universal 'teach' Skill<br/>skills/teach/SKILL.md"]
         Agent --- Skill
     end
 
-    subgraph MCPBridge [Model Context Protocol (stdio / JSON-RPC)]
-        Agent -->|Tool Calls| Server[mcp-tutor Server]
+    subgraph MCPBridge ["Model Context Protocol — stdio / JSON-RPC"]
+        Agent -->|Tool Calls| Server["mcp-tutor Server"]
         Server -->|Tool Results| Agent
     end
 
-    subgraph Engines [Core Engines]
+    subgraph Engines ["Core Engines"]
         QuizEngine["Quiz Engine<br/>• Bare-claim distractor check<br/>• Auto-injected 'I don't know'"]
-        NoteEngine["Obsidian Live Sync<br/>• Delayed Answer Reveal<br/>• Native LaTeX Math ($...)"]
-        VizEngine["Diagram Manager<br/>• Mermaid DAGs & SVGs<br/>• Saved to vault/viz/"]
+        NoteEngine["Obsidian Live Sync<br/>• Delayed Answer Reveal<br/>• Native LaTeX Math"]
+        VizEngine["Diagram Manager<br/>• Mermaid DAGs and SVGs<br/>• Saved to vault/viz/"]
     end
 
-    subgraph Outputs [Learner Interface]
-        UIModal["Interactive Micro-Modal<br/>(http://127.0.0.1:7331)<br/>Keys: 1-9, 0 (IDK), Enter"]
-        VaultNote["Obsidian Markdown Note<br/>(notes/<topic>.md)"]
+    subgraph Outputs ["Learner Interface"]
+        UIModal["Interactive Micro-Modal<br/>http://127.0.0.1:7331<br/>Keys: 1-9, 0 (IDK), Enter"]
+        VaultNote["Obsidian Markdown Note<br/>notes/topic.md"]
     end
 
     Server --> QuizEngine
@@ -57,6 +57,7 @@ flowchart TD
     NoteEngine --> VaultNote
     VizEngine --> VaultNote
 ```
+
 
 ---
 
