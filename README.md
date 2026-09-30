@@ -77,7 +77,7 @@ flowchart TD
 ### 1. Clone & Set Up Environment
 
 ```bash
-git clone <YOUR_REPO_URL> mcp-tutor
+git clone https://github.com/mohaneesh-03/ai-learn.git mcp-tutor
 cd mcp-tutor
 
 # Create virtual environment
