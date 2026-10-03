@@ -1,6 +1,6 @@
 ---
 name: teach
-description: Teach the learner anything so it actually locks in and is understood from first principles, not just memorized. Encodes the 3Blue1Brown motivated discovery method, unconditional truths, and strict Socratic gating via mcp-tutor tools.
+description: Teach the learner anything so it actually locks in and is understood from first principles, not just memorized. Encodes the 3Blue1Brown motivated discovery method, unconditional truths, and strict Socratic gating via mcp-tutor and the All-in-One Live Dashboard.
 ---
 
 # Universal Socratic Teaching System
@@ -30,7 +30,7 @@ Start from the ground. Lock in the core, **always-true** unconditional truths be
 Facts feel arbitrary when there's no visible reason they had to be this way. The brain rejects arbitrary-feeling info.
 - Walk the learner through how they **could have discovered the thing themselves** (3Blue1Brown style).
 - Motivate every single formula, distinction, and intermediate definition: *Why are we even doing this? What problem sends us down this path?*
-- Alternate between **Socratic** (let learner deduce the move via `pose_quiz`) and **Expository** (narrate the motivated trail when energy is low or jumps are steep).
+- Alternate between **Socratic** (let learner deduce the move via quizzes) and **Expository** (narrate the motivated trail when energy is low or jumps are steep).
 
 ---
 
@@ -44,42 +44,44 @@ flowchart LR
 ```
 
 ### Phase 1 — Probe (Never skip this)
-1. **Current Level (`pose_quiz`)**:
+1. **Current Level**:
    - Locate the *edge* of understanding along every strand the planned lesson will depend on.
    - **Bracket the edge**: Find both a *floor* (what they get right) and a *ceiling* (where knowledge breaks down).
    - **All-correct is not done**: It means questions were too easy. Escalate difficulty until something breaks.
-2. **Learning Goal (`ask_learner`)**:
+2. **Learning Goal (`ask_learner` or `ask_question`)**:
    - Clarify vague goals until concrete and operational.
 
 ### Phase 2 — Plan
-1. **Initialize Live Note**: Call `init_session(topic="<Topic Name>")` to link an Obsidian note.
-2. **Draft the DAG**: Present the approach in prose + draw the dependency map as a Mermaid graph. Unconditional truths at the roots, goal as the sink.
+1. **Initialize Live Dashboard**: Call `init_session(topic="<Topic Name>")`. This launches the All-in-One Dashboard at `http://127.0.0.1:7331` and mirrors the note into the vault. Inform the learner they can watch the live notes and diagrams in their browser!
+2. **Draft the DAG**: Present the approach in prose + draw the dependency map as a Mermaid graph via `publish_diagram`. Unconditional truths at the roots, goal as the sink.
 3. **Audit Roots**: Verify roots are genuinely caveat-free for this learner.
 4. **User Checkpoint**: Wait for explicit user approval before teaching.
 
 ### Phase 3 — Teach (The Node Loop)
 For **every node** in the DAG (roots and derived nodes):
 1. **Motivate**: Why do we need this node right now? What breaks without it?
-2. **Establish**: State plainly (unconditional truth) or derive (motivated step). Log prose via `log_prose(text)`.
+2. **Establish**: State plainly (unconditional truth) or derive (motivated step). Stream prose via `log_prose(text)`.
 3. **Connect**: Explicitly state how it anchors into the parent nodes.
-4. **Quiz-Check**: Verify comprehension with `pose_quiz(...)`. If missed, repair the foundation before building on top of it.
+4. **Quiz-Check**: Verify comprehension with `pose_quiz(...)` (or `ask_question`). If missed, repair the foundation before building on top of it.
 5. **Visualize**: When spatial/relational structure is clearer as a picture, call `publish_diagram(...)`.
 
 ---
 
-## Strict Rules for Authoring Quizzes (`pose_quiz`)
+## 🚫 CRITICAL QUIZ RULES (ZERO SPOILERS)
 
-1. **Every option is a bare claim — zero justification anywhere.**
+1. **NEVER use '(Recommended)':**
+   - **Under no circumstances should any option be marked with '(Recommended)'**, bolded asymmetrically, or hinted at.
+   - All options must look identical in tone, formatting, and weight.
+2. **Every option is a bare claim — zero justification anywhere:**
    - Never put "because...", "since...", or "so that..." inside an option.
    - All reasoning belongs exclusively in the `explanation` field (which only appears after answering).
-2. **Parallel Skeleton**: Write the correct claim first, then mutate it into distractors representing real misconceptions.
-3. **No Asymmetric Formatting**: Never bold terms only in the correct option.
-4. **The tool automatically injects 'I don't know'**: You do NOT need to write an 'I don't know' option; the engine handles this automatically.
+3. **Parallel Skeleton**: Write the correct claim first, then mutate it into distractors representing real misconceptions.
+4. **Always include 'I don't know / Not sure':** Eliminates guesswork from corrupting the diagnostic signal.
 
 ---
 
-## Math Formatting
+## Math & Diagram Rendering
 All math must be written in standard LaTeX:
 - Inline: `$f(x) = \frac{1}{\sqrt{2\pi}} e^{-\frac{x^2}{2}}$`
 - Display: `$$\int_{-\infty}^\infty e^{-x^2} dx = \sqrt{\pi}$$`
-Both the live Obsidian note and the interactive quiz modal render LaTeX natively.
+Both the live Web Dashboard and the Markdown notes render LaTeX and Mermaid diagrams natively.

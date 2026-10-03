@@ -1,7 +1,7 @@
 import re
 from typing import List, Tuple
 from mcp_tutor.models import QuizRequest, QuizResult
-from mcp_tutor.ui.web_modal import QUIZ_SERVER
+from mcp_tutor.ui.dashboard import DASHBOARD
 
 def validate_distractor_quality(options: List[str]) -> List[str]:
     """
@@ -34,9 +34,10 @@ def validate_distractor_quality(options: List[str]) -> List[str]:
 
 async def run_quiz(req: QuizRequest, auto_open: bool = True) -> Tuple[QuizResult, List[str]]:
     """
-    Runs distractor validation and triggers the interactive quiz modal.
+    Runs distractor validation and triggers the interactive quiz in the All-in-One Dashboard.
     Returns (QuizResult, warnings_list).
     """
     warnings = validate_distractor_quality(req.options)
-    result = await QUIZ_SERVER.ask_quiz(req, auto_open=auto_open)
+    result_dict = await DASHBOARD.pose_quiz(req.model_dump(), auto_open=auto_open)
+    result = QuizResult(**result_dict)
     return result, warnings

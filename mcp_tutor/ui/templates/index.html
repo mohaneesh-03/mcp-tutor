@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP Tutor — All-in-One Learning Dashboard</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- KaTeX for Math -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Marked for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Mermaid.js for Diagrams -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --sidebar-bg: #0d131f;
+      --border: #1f293d;
+      --border-highlight: #374151;
+      --text: #94a3b8;
+      --text-bright: #f8fafc;
+      --text-muted: #64748b;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.15);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.15);
+      --danger: #f43f5e;
+      --danger-glow: rgba(244, 63, 94, 0.15);
+      --idk: #818cf8;
+      --idk-glow: rgba(129, 140, 248, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: rgba(13, 19, 31, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-badge {
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      color: #090d16;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    .lesson-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: #34d399;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.9); } }
+
+    /* Layout Containers */
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px;
+      flex: 1;
+    }
+
+    @media (max-width: 1024px) {
+      .container { grid-template-columns: 1fr; }
+    }
+
+    /* Main Lesson Stream */
+    .lesson-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      animation: slideIn 0.2s ease-out;
+      line-height: 1.7;
+    }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card h1, .card h2, .card h3 {
+      color: var(--text-bright);
+      margin-top: 16px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .card h1 { font-size: 24px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .card h2 { font-size: 20px; }
+    .card h3 { font-size: 16px; color: var(--accent); }
+    .card p { margin-bottom: 14px; font-size: 15px; }
+    .card ul, .card ol { margin-left: 24px; margin-bottom: 14px; }
+    .card li { margin-bottom: 6px; }
+    .card blockquote {
+      border-left: 3px solid var(--accent);
+      padding: 8px 16px;
+      background: var(--accent-glow);
+      border-radius: 0 6px 6px 0;
+      margin: 16px 0;
+      color: #e2e8f0;
+    }
+
+    /* Code Blocks */
+    pre code {
+      display: block;
+      background: #0b0f19;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13.5px;
+      color: #e2e8f0;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    :not(pre) > code {
+      background: #1e293b;
+      color: #38bdf8;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+    }
+
+    /* Interactive Quiz Block */
+    .quiz-card {
+      border: 1px solid var(--accent);
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.05), var(--card-bg));
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.1);
+      position: relative;
+    }
+    .quiz-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--accent);
+      background: var(--accent-glow);
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+    }
+    .quiz-question {
+      font-size: 19px;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin-bottom: 20px;
+    }
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #151d2e;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 15px;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+    .option-item:hover, .option-item.selected {
+      background: #1c273e;
+      border-color: var(--accent);
+      color: var(--text-bright);
+    }
+    .opt-key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .option-item.selected .opt-key {
+      background: var(--accent);
+      color: #090d16;
+    }
+    .dont-know-item {
+      border-style: dashed;
+      color: #94a3b8;
+    }
+    .dont-know-item:hover, .dont-know-item.selected {
+      border-color: var(--idk);
+      color: var(--text-bright);
+      background: var(--idk-glow);
+    }
+
+    .student-note-input {
+      width: 100%;
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: var(--text-bright);
+      font-size: 14px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+    .student-note-input:focus { border-color: var(--accent); }
+
+    .quiz-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .submit-btn {
+      background: var(--accent);
+      color: #090d16;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .submit-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3); }
+
+    /* Resolved Quiz State */
+    .resolved-box {
+      border-radius: 8px;
+      padding: 18px;
+      margin-top: 14px;
+      border: 1px solid;
+    }
+    .resolved-box.correct {
+      background: var(--success-glow);
+      border-color: var(--success);
+      color: #34d399;
+    }
+    .resolved-box.misconception {
+      background: var(--danger-glow);
+      border-color: var(--danger);
+      color: #fb7185;
+    }
+    .resolved-box.dont_know {
+      background: var(--idk-glow);
+      border-color: var(--idk);
+      color: #a5b4fc;
+    }
+    .derivation-text {
+      margin-top: 10px;
+      color: #e2e8f0;
+      font-size: 14.5px;
+      line-height: 1.6;
+    }
+
+    /* Right Sidebar: Knowledge Hub */
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .sidebar-card {
+      background: var(--sidebar-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .sidebar-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .stat-box {
+      background: #111827;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+    .stat-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Mermaid DAG Container */
+    #dagContainer {
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      overflow-x: auto;
+      min-height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="logo-badge">MCP TUTOR</div>
+      <div class="lesson-title" id="headerTopic">Connecting to Active Lesson...</div>
+    </div>
+    <div class="status-badge" id="statusBadge">
+      <div class="status-dot"></div>
+      <span id="statusText">Live Connected</span>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Main Reading & Quiz Flow -->
+    <main class="lesson-stream" id="lessonStream">
+      <div class="empty-state" id="emptyState">
+        <h3>Waiting for your AI Tutor to begin...</h3>
+        <p style="margin-top: 8px; font-size: 14px;">Prompt your agent: <em>"Teach me [topic] using the teach skill"</em></p>
+      </div>
+    </main>
+
+    <!-- Sidebar: Knowledge DAG & Metrics -->
+    <aside class="sidebar">
+      <!-- Knowledge Graph -->
+      <div class="sidebar-card">
+        <div class="sidebar-title">🗺️ Knowledge Dependency DAG</div>
+        <div id="dagContainer">
+          <span style="font-size: 12px; color: var(--text-muted);">No DAG established yet.</span>
+        </div>
+      </div>
+
+      <!-- Real-Time Comprehension Stats -->
+      <div class="sidebar-card">
+        <div class="sidebar-title">📊 Diagnostic Mastery</div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-num" id="statCorrect" style="color: #34d399;">0</div>
+            <div class="stat-lbl">Understood</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num" id="statMisconceptions" style="color: #fb7185;">0</div>
+            <div class="stat-lbl">Gaps Fixed</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num" id="statDontKnow" style="color: #818cf8;">0</div>
+            <div class="stat-lbl">Honest IDK</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num" id="statTotal">0</div>
+            <div class="stat-lbl">Total Checks</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+
+    let ws;
+    let activeQuizData = null;
+    let selectedOptionIndex = -1;
+
+    function renderMath() {
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    function connectWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+
+      ws.onopen = () => {
+        document.getElementById('statusText').textContent = 'Live Connected';
+        document.getElementById('statusBadge').style.borderColor = 'rgba(16, 185, 129, 0.3)';
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        handleMessage(msg);
+      };
+
+      ws.onclose = () => {
+        document.getElementById('statusText').textContent = 'Disconnected — Retrying';
+        document.getElementById('statusBadge').style.borderColor = 'rgba(244, 63, 94, 0.3)';
+        setTimeout(connectWebSocket, 2000);
+      };
+    }
+
+    function handleMessage(msg) {
+      if (msg.type === 'sync_state' || msg.type === 'session_init') {
+        const data = msg.data;
+        document.getElementById('headerTopic').textContent = data.topic;
+        renderFullStream(data.blocks);
+        updateStats(data.stats);
+        if (data.mermaid_dag) renderDag(data.mermaid_dag);
+      } else if (msg.type === 'append_prose') {
+        appendProseBlock(msg.block.content);
+      } else if (msg.type === 'append_diagram') {
+        appendDiagramBlock(msg.block);
+        if (msg.mermaid_dag) renderDag(msg.mermaid_dag);
+      } else if (msg.type === 'quiz_prompt') {
+        appendQuizBlock(msg.quiz);
+      } else if (msg.type === 'quiz_resolved') {
+        resolveActiveQuizBlock(msg.resolution);
+        if (msg.stats) updateStats(msg.stats);
+      }
+    }
+
+    function renderFullStream(blocks) {
+      const stream = document.getElementById('lessonStream');
+      stream.innerHTML = '';
+      if (!blocks || blocks.length === 0) {
+        stream.innerHTML = `
+          <div class="empty-state">
+            <h3>Lesson initialized.</h3>
+            <p style="margin-top: 8px;">Tutor is preparing the first unconditional truth...</p>
+          </div>
+        `;
+        return;
+      }
+      blocks.forEach(b => {
+        if (b.type === 'prose') appendProseBlock(b.content);
+        else if (b.type === 'diagram') appendDiagramBlock(b);
+        else if (b.type === 'quiz') {
+          if (b.resolved) renderResolvedQuizDirect(b.data, b.result);
+          else appendQuizBlock(b.data);
+        }
+      });
+      renderMath();
+    }
+
+    function appendProseBlock(markdownText) {
+      document.getElementById('emptyState')?.remove();
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = marked.parse(markdownText);
+      document.getElementById('lessonStream').appendChild(card);
+      renderMath();
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function appendDiagramBlock(block) {
+      document.getElementById('emptyState')?.remove();
+      const card = document.createElement('div');
+      card.className = 'card';
+      if (block.title) {
+        card.innerHTML += `<h3>${block.title}</h3>`;
+      }
+      const div = document.createElement('div');
+      div.className = 'mermaid';
+      div.textContent = block.code;
+      card.appendChild(div);
+      document.getElementById('lessonStream').appendChild(card);
+      mermaid.run({ nodes: [div] });
+    }
+
+    async function renderDag(code) {
+      const container = document.getElementById('dagContainer');
+      container.innerHTML = `<div class="mermaid">${code}</div>`;
+      await mermaid.run({ nodes: container.querySelectorAll('.mermaid') });
+    }
+
+    function appendQuizBlock(quiz) {
+      document.getElementById('emptyState')?.remove();
+      activeQuizData = quiz;
+      selectedOptionIndex = -1;
+
+      const card = document.createElement('div');
+      card.className = 'card quiz-card';
+      card.id = `card-${quiz.id}`;
+
+      let optionsHtml = '';
+      quiz.options.forEach((opt, idx) => {
+        const key = opt.is_dont_know ? '0' : (idx + 1);
+        optionsHtml += `
+          <div class="option-item ${opt.is_dont_know ? 'dont-know-item' : ''}" id="opt-${idx}" onclick="selectQuizOption(${idx})">
+            <span class="opt-key">${key}</span>
+            <span style="flex: 1;">${opt.label}</span>
+          </div>
+        `;
+      });
+
+      card.innerHTML = `
+        <span class="quiz-tag">Diagnostic Check</span>
+        ${quiz.context ? `<p style="color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">${quiz.context}</p>` : ''}
+        <div class="quiz-question">${quiz.question}</div>
+        <div class="options-grid">${optionsHtml}</div>
+        <input type="text" class="student-note-input" id="noteInput" placeholder="Optional reasoning or thought note..." />
+        <div class="quiz-actions">
+          <span style="font-size: 12px; color: var(--text-muted);">Use keys [1-9], [0] for IDK, [Enter] to submit</span>
+          <button class="submit-btn" id="submitQuizBtn" disabled onclick="submitQuiz()">Submit Check</button>
+        </div>
+        <div id="resultMount-${quiz.id}"></div>
+      `;
+
+      document.getElementById('lessonStream').appendChild(card);
+      renderMath();
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function selectQuizOption(idx) {
+      if (!activeQuizData) return;
+      selectedOptionIndex = idx;
+      activeQuizData.options.forEach((_, i) => {
+        document.getElementById(`opt-${i}`)?.classList.toggle('selected', i === idx);
+      });
+      document.getElementById('submitQuizBtn').disabled = false;
+    }
+
+    function submitQuiz() {
+      if (!activeQuizData || selectedOptionIndex === -1) return;
+      const opt = activeQuizData.options[selectedOptionIndex];
+      const note = document.getElementById('noteInput')?.value.trim() || null;
+      const isDontKnow = !!opt.is_dont_know;
+      const isCorrect = !isDontKnow && (selectedOptionIndex === activeQuizData.correct_index);
+
+      // Disable inputs
+      document.getElementById('submitQuizBtn').disabled = true;
+      document.getElementById('noteInput').disabled = true;
+
+      ws.send(JSON.stringify({
+        type: 'quiz_submit',
+        quiz_id: activeQuizData.id,
+        selected_index: isDontKnow ? -1 : selectedOptionIndex,
+        selected_label: opt.label,
+        is_correct: isCorrect,
+        dont_know: isDontKnow,
+        student_notes: note
+      }));
+    }
+
+    function resolveActiveQuizBlock(res) {
+      const mount = document.getElementById(`resultMount-${res.id}`);
+      if (!mount) return;
+
+      const cls = res.is_correct ? 'correct' : (res.dont_know ? 'dont_know' : 'misconception');
+      const title = res.is_correct ? '✓ Correct Understanding' : (res.dont_know ? '❓ Honest Admission (Zero Guesses)' : '✗ Misconception Detected');
+
+      mount.innerHTML = `
+        <div class="resolved-box ${cls}">
+          <strong>${title}</strong>
+          <div style="font-size: 14px; margin-top: 6px;">
+            ${res.dont_know ? `Ground Truth: <strong>${res.correct_label}</strong>` : (!res.is_correct ? `You selected: <em>${res.selected_label}</em><br>Ground Truth: <strong>${res.correct_label}</strong>` : '')}
+          </div>
+          <div class="derivation-text">${res.explanation}</div>
+        </div>
+      `;
+      renderMath();
+      activeQuizData = null;
+    }
+
+    function renderResolvedQuizDirect(quiz, res) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const cls = res.is_correct ? 'correct' : (res.dont_know ? 'dont_know' : 'misconception');
+      card.innerHTML = `
+        <span class="quiz-tag" style="background: rgba(255,255,255,0.05); color: var(--text-muted);">Completed Diagnostic</span>
+        <div class="quiz-question">${quiz.question}</div>
+        <div class="resolved-box ${cls}">
+          <strong>${res.is_correct ? '✓ Understood' : (res.dont_know ? '❓ Addressed Gap' : '✗ Misconception')}</strong>
+          <div class="derivation-text">${res.explanation}</div>
+        </div>
+      `;
+      document.getElementById('lessonStream').appendChild(card);
+    }
+
+    function updateStats(stats) {
+      if (!stats) return;
+      document.getElementById('statCorrect').textContent = stats.correct || 0;
+      document.getElementById('statMisconceptions').textContent = stats.misconceptions || 0;
+      document.getElementById('statDontKnow').textContent = stats.dont_know || 0;
+      document.getElementById('statTotal').textContent = stats.total_checks || 0;
+    }
+
+    // Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (!activeQuizData) return;
+      if (e.target.tagName === 'INPUT') {
+        if (e.key === 'Enter') submitQuiz();
+        return;
+      }
+      if (e.key >= '1' && e.key <= '9') {
+        const num = parseInt(e.key) - 1;
+        if (num < activeQuizData.options.length - 1) selectQuizOption(num);
+      } else if (e.key === '0' || e.key.toLowerCase() === 'd') {
+        selectQuizOption(activeQuizData.options.length - 1);
+      } else if (e.key === 'Enter') {
+        if (selectedOptionIndex !== -1) submitQuiz();
+      }
+    });
+
+    connectWebSocket();
+  </script>
+</body>
+</html>
